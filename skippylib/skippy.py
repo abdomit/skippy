@@ -728,10 +728,8 @@ class Skippy(AbstractSkippyObj):
                         attrName = indexes[i][j]
                         attrStruct = self.attributes[attrName]
                         try:
-                            # With formulas, they will be responsible to build
-                            # the conversion.
-                            if attrStruct.readFormula:
-                                attrStruct.lastReadValue = value
+                            if self.__isFormula(attrName, value):
+                                pass
                             # old way tries the transformation based on
                             # attribute type information.
                             elif self.__isScalarBoolean(attrName, value):
@@ -859,6 +857,28 @@ class Skippy(AbstractSkippyObj):
             except:
                 self.attributes[attrName].lastReadValue = None
                 self.attributes[attrName].quality = \
+                    AttrQuality.ATTR_INVALID
+            return True
+        else:
+            return False
+
+    def __isFormula(self, attrName, attrValue):
+        attrStruct = self.attributes[attrName]
+        if attrStruct.readFormula:
+            attrStruct.debug_stream("Evaluating %r with VALUE=%r"
+                              % (attrStruct._readFormula, attrValue))
+            try:
+                formula = attrStruct._readFormula.replace("VALUE", "%r"
+                                                    % attrValue)
+                attrStruct.debug_stream("eval(%r)" % (formula))
+                value = eval(formula)
+                attrStruct.lastReadValue = value
+                attrStruct.quality = \
+                    AttrQuality.ATTR_VALID
+            except Exception as e:
+                attrStruct.warn_stream("Exception evaluating formula: %s" % (e))
+                attrStruct.lastReadValue = None
+                attrStruct.quality = \
                     AttrQuality.ATTR_INVALID
             return True
         else:
