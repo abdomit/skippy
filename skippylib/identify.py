@@ -43,6 +43,7 @@ def identifier(idn, parent):
             'rohde&schwarz': rohdeschwarz,
             'tektronix': tektronix,
             'ub': ub,
+            'elektro-automatik': elektro_automatik
             }[company](model)
     builder = Builder(name="Builder", parent=parent)
     builder.parseFile(file)
@@ -53,14 +54,14 @@ def splitIDN(idn):
     # Only company and model in use. Perhaps one day the firmware version
     # would be useful but not found the case by now.
     idn = idn.strip().lower()
-    if idn.count(',') == 3:
+    if idn.count(',') >= 3:
         separator = ','
     elif idn.count(' ') == 3:
         separator = ' '
     else:
         raise SyntaxError("Could not identify the separator in %r" % (idn))
     try:
-        company, model, rest = idn.split(separator, 2)
+        company, model, _ = idn.split(separator, 2)
         company = company.strip()
         model = model.strip()
         return company, model
@@ -133,6 +134,12 @@ def ub(model):
     if model == 'music':
         return _getFilePath('instructions/photomultiplier/music.py')
     raise EnvironmentError("UB %s model not supported" % (model))
+
+
+def elektro_automatik(model):
+    if model == 'ps 3200-2 c':
+        return _getFilePath('instructions/elektro_automatik/ps32002c.py')
+    raise EnvironmentError("Elektro-Automatik %s model not supported" % (model))
 
 
 def fakeinstrument(model):
