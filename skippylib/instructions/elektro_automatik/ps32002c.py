@@ -39,3 +39,17 @@ Attribute('Voltage',
            'writeCmd': lambda value: "VOLT %s" % (value),
            })
 
+Attribute('Output',
+          {'type': PyTango.CmdArgType.DevBoolean,
+           'dim': [0],
+           'readCmd': "OUTP?",
+           'writeCmd': lambda value: "OUTP %s"
+           % ('ON' if value else 'OFF'),
+           })
+
+Attribute('Remote_Control',
+          {'type': PyTango.CmdArgType.DevString,
+           'dim': [0],
+           'readCmd': "SYST:LOCK:OWN?",
+           })
+
